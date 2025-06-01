@@ -40,8 +40,8 @@ def analyze_chart(data: UserInput):
 async def interpret_chart(request: Request):
     data = await request.json()
     prompt = f"Interpret this data astrologically:\n{data}"
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
-    return {"message": response['choices'][0]['message']['content']}
+    return {"message": response.choices[0].message.content}
