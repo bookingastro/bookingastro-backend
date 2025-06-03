@@ -53,7 +53,7 @@ async def interpret_chart(data: ChartData):
     prompt = f"Interpret this data astrologically:\n{data.dict()}"
     try:
         response = openai.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}]
         )
         return {"message": response.choices[0].message.content}
