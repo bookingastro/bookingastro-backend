@@ -1,11 +1,13 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
 import os
 
+# Initialize app
 app = FastAPI()
 
+# Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,7 +15,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Set OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# === Models ===
 
 class UserInput(BaseModel):
     name: str
@@ -21,8 +26,15 @@ class UserInput(BaseModel):
     time: str
     place: str
 
+class ChartData(BaseModel):
+    numerology: dict
+    horoscope: dict
+
+# === Routes ===
+
 @app.post("/api/analyze")
 def analyze_chart(data: UserInput):
+    # Dummy numerology + horoscope values
     return {
         "numerology": {
             "life_path": "7",
@@ -37,11 +49,13 @@ def analyze_chart(data: UserInput):
     }
 
 @app.post("/api/interpret")
-async def interpret_chart(request: Request):
-    data = await request.json()
-    prompt = f"Interpret this data astrologically:\n{data}"
-    response = openai.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return {"message": response.choices[0].message.content}
+async def interpret_chart(data: ChartData):
+    prompt = f"Interpret this data astrologically:\n{data.dict()}"
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return {"message": response.choices[0].message.content}
+    except Exception as e:
+        return {"message": f"Interpretation error: {str(e)}"}
